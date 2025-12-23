@@ -3,8 +3,15 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 require('dotenv').config();
 
+// Ensure data directory exists
+const dataDir = path.join(__dirname, '..', 'data');
+const fs = require('fs');
+if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+}
+
 // Create database file
-const dbPath = path.join(__dirname, '..', 'data', 'portal_akademik.db');
+const dbPath = path.join(dataDir, 'portal_akademik.db');
 const db = new Database(dbPath);
 
 // Enable foreign keys
@@ -13,9 +20,11 @@ db.pragma('foreign_keys = ON');
 // Initialize database tables
 function initDatabase() {
     try {
-        // Create users table
-        const row = db.prepare("SELECT COUNT(*) as count FROM users").get();
-        if (row.count === 0) {
+        // Check if users table exists
+        const tableCheck = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='users'").get();
+
+        if (!tableCheck) {
+            // Create users table
             db.exec(`
                 CREATE TABLE users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,24 +34,28 @@ function initDatabase() {
                     role TEXT DEFAULT 'user',
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                     is_verified INTEGER DEFAULT 0,
-                    otp_code TEXT
+                    otp_code TEXT,
+                    reset_token TEXT,
+                    reset_expires DATETIME
                 )
             `);
-            console.log('Tabel users berhasil dibuat');
+            console.log('✅ Tabel users berhasil dibuat');
         } else {
-            // Check if columns exist using pragma
+            // Check existing table columns
             const columns = db.pragma('table_info(users)');
-            const hasVerified = columns.some(col => col.name === 'is_verified');
 
-            if (!hasVerified) {
-                console.log('Menambahkan kolom is_verified dan otp_code ke tabel users...');
-                try {
-                    db.exec('ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0');
-                    db.exec('ALTER TABLE users ADD COLUMN otp_code TEXT');
-                    console.log('Kolom berhasil ditambahkan');
-                } catch (e) {
-                    console.error('Gagal alter table:', e);
-                }
+            // Add is_verified and otp_code if missing
+            if (!columns.some(col => col.name === 'is_verified')) {
+                console.log('Menambahkan kolom is_verified...', db.exec('ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 0'));
+            }
+            if (!columns.some(col => col.name === 'otp_code')) {
+                console.log('Menambahkan kolom otp_code...', db.exec('ALTER TABLE users ADD COLUMN otp_code TEXT'));
+            }
+            if (!columns.some(col => col.name === 'reset_token')) {
+                console.log('Menambahkan kolom reset_token...', db.exec('ALTER TABLE users ADD COLUMN reset_token TEXT'));
+            }
+            if (!columns.some(col => col.name === 'reset_expires')) {
+                console.log('Menambahkan kolom reset_expires...', db.exec('ALTER TABLE users ADD COLUMN reset_expires DATETIME'));
             }
         }
         db.exec(`
