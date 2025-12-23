@@ -1,7 +1,7 @@
 # Dependencies
 node_modules/
 
-# Environment variables (SENSITIVE - DO NOT UPLOAD)
+# Environment variables
 .env
 
 # Database
