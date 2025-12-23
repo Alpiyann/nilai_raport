@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Akademik - Rekomendasi PTN">
+    <title>Rekomendasi PTN - Portal Akademik</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .rekomendasi-header {
+            background: var(--gradient-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rekomendasi-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .rekomendasi-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-6);
+        }
+
+        .rekomendasi-info h2 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+        }
+
+        .rekomendasi-info p {
+            opacity: 0.9;
+        }
+
+        .nilai-display {
+            text-align: center;
+            padding: var(--space-6);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-xl);
+            min-width: 180px;
+        }
+
+        .nilai-display-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.8;
+            margin-bottom: var(--space-2);
+        }
+
+        .nilai-display-value {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .filter-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+        }
+
+        .stat-pill-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .stat-pill-dot.aman {
+            background: var(--accent-emerald);
+        }
+
+        .stat-pill-dot.rekomendasi {
+            background: var(--primary-500);
+        }
+
+        .stat-pill-dot.menantang {
+            background: var(--accent-amber);
+        }
+
+        .stat-pill-dot.sangat-menantang {
+            background: var(--accent-rose);
+        }
+
+        .ptn-card {
+            padding: var(--space-6);
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-base);
+        }
+
+        .ptn-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .ptn-category {
+            position: absolute;
+            top: var(--space-4);
+            right: var(--space-4);
+        }
+
+        .ptn-header {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .ptn-logo {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-2xl);
+            flex-shrink: 0;
+        }
+
+        .ptn-info h3 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+            padding-right: 80px;
+        }
+
+        .ptn-info .jurusan {
+            color: var(--primary-400);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-1);
+        }
+
+        .ptn-info .lokasi {
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+        }
+
+        .ptn-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .ptn-detail {
+            text-align: center;
+        }
+
+        .ptn-detail-value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+        }
+
+        .ptn-detail-value.positive {
+            color: var(--accent-emerald);
+        }
+
+        .ptn-detail-value.negative {
+            color: var(--accent-rose);
+        }
+
+        .ptn-detail-label {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .no-data-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: var(--space-16);
+            color: var(--text-muted);
+        }
+
+        .no-data-message h3 {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--space-2);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .rekomendasi-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .ptn-details {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🎓</div>
+            <span class="sidebar-logo-text">Cek Rata-Rata</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="9"></rect>
+                    <rect x="14" y="3" width="7" height="5"></rect>
+                    <rect x="14" y="12" width="7" height="9"></rect>
+                    <rect x="3" y="16" width="7" height="5"></rect>
+                </svg>
+                Dashboard
+            </a>
+            <a href="/mapel" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                </svg>
+                Kelola Mapel
+            </a>
+            <a href="/nilai" class="sidebar-nav-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                Nilai Raport
+            </a>
+            <a href="/rekomendasi" class="sidebar-nav-item active">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                </svg>
+                Rekomendasi PTN
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="userAvatar">U</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="userName">User</div>
+                    <div class="sidebar-user-email" id="userEmail">user@email.com</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: var(--space-4);" onclick="logout()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header Section -->
+        <section class="rekomendasi-header">
+            <div class="rekomendasi-content">
+                <div class="rekomendasi-info">
+                    <h2>🎯 Rekomendasi PTN Untukmu</h2>
+                    <p>Temukan perguruan tinggi negeri yang sesuai dengan nilai akademikmu</p>
+                </div>
+                <div class="nilai-display">
+                    <div class="nilai-display-label">Rata-rata Nilaimu</div>
+                    <div class="nilai-display-value" id="userAverage">0.00</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">Kelompok:</span>
+                <select id="filterKelompok" class="form-select" style="width: auto;" onchange="loadRekomendasi()">
+                    <option value="all">Semua</option>
+                    <option value="Saintek">Saintek</option>
+                    <option value="Soshum">Soshum</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <span class="filter-label">Cari:</span>
+                <input type="text" id="searchPTN" class="form-input" style="width: 250px;"
+                    placeholder="Cari PTN atau jurusan..." oninput="filterResults()">
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary" id="statsSummary">
+            <!-- Stats will be rendered here -->
+        </div>
+
+        <!-- PTN Grid -->
+        <div class="recommendation-grid" id="ptnGrid">
+            <!-- PTN cards will be rendered here -->
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        let allRecommendations = [];
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+                if (!data.isAuthenticated) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return data.user;
+            } catch (error) {
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await checkAuth();
+            if (!user) return;
+
+            document.getElementById('userName').textContent = user.nama;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').textContent = user.nama.charAt(0).toUpperCase();
+        }
+
+        // Load recommendations
+        async function loadRekomendasi() {
+            const kelompok = document.getElementById('filterKelompok').value;
+
+            try {
+                const response = await fetch(`/api/rekomendasi?kelompok=${kelompok}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('userAverage').textContent = data.userAverage || '0.00';
+                    allRecommendations = data.data;
+
+                    renderStats(data.stats);
+                    renderRecommendations(data.data, data.message);
+                }
+            } catch (error) {
+                console.error('Failed to load recommendations:', error);
+            }
+        }
+
+        // Render stats
+        function renderStats(stats) {
+            if (!stats) return;
+
+            const container = document.getElementById('statsSummary');
+            container.innerHTML = `
+                <div class="stat-pill">
+                    <span class="stat-pill-dot aman"></span>
+                    <span>${stats.aman} Aman</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-dot rekomendasi"></span>
+                    <span>${stats.rekomendasi} Rekomendasi</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-dot menantang"></span>
+                    <span>${stats.menantang} Menantang</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-pill-dot sangat-menantang"></span>
+                    <span>${stats.sangatMenantang} Sangat Menantang</span>
+                </div>
+            `;
+        }
+
+        // Render recommendations
+        function renderRecommendations(data, message) {
+            const grid = document.getElementById('ptnGrid');
+
+            if (data.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-data-message glass-card-static">
+                        <div style="font-size: 4rem; margin-bottom: var(--space-4);">📚</div>
+                        <h3>${message || 'Belum ada rekomendasi'}</h3>
+                        <p>${message ? '' : 'Tambahkan nilai mata pelajaran terlebih dahulu untuk mendapatkan rekomendasi PTN.'}</p>
+                        <a href="/mapel" class="btn btn-primary" style="margin-top: var(--space-6);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            Tambah Mata Pelajaran
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = data.map(ptn => {
+                const kategori = ptn.kategori_rekomendasi.toLowerCase().replace(' ', '-');
+                const selisih = parseFloat(ptn.selisih).toFixed(1);
+                const isPositive = parseFloat(ptn.selisih) >= 0;
+
+                return `
+                    <div class="ptn-card glass-card ${kategori}">
+                        <span class="ptn-category badge badge-${getCategoryBadge(ptn.kategori_rekomendasi)}">${ptn.kategori_rekomendasi}</span>
+                        <div class="ptn-header">
+                            <div class="ptn-logo">🎓</div>
+                            <div class="ptn-info">
+                                <h3>${ptn.nama_ptn}</h3>
+                                <div class="jurusan">${ptn.nama_jurusan}</div>
+                                <div class="lokasi">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    ${ptn.lokasi}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ptn-details">
+                            <div class="ptn-detail">
+                                <div class="ptn-detail-value">${parseFloat(ptn.passing_grade).toFixed(1)}</div>
+                                <div class="ptn-detail-label">Passing Grade</div>
+                            </div>
+                            <div class="ptn-detail">
+                                <div class="ptn-detail-value ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${selisih}</div>
+                                <div class="ptn-detail-label">Selisih</div>
+                            </div>
+                            <div class="ptn-detail">
+                                <div class="ptn-detail-value">${ptn.daya_tampung || '-'}</div>
+                                <div class="ptn-detail-label">Daya Tampung</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filter results
+        function filterResults() {
+            const query = document.getElementById('searchPTN').value.toLowerCase();
+
+            const filtered = allRecommendations.filter(ptn =>
+                ptn.nama_ptn.toLowerCase().includes(query) ||
+                ptn.nama_jurusan.toLowerCase().includes(query) ||
+                ptn.lokasi.toLowerCase().includes(query)
+            );
+
+            renderRecommendations(filtered);
+        }
+
+        // Get category badge
+        function getCategoryBadge(kategori) {
+            switch (kategori) {
+                case 'Aman': return 'emerald';
+                case 'Rekomendasi': return 'purple';
+                case 'Menantang': return 'amber';
+                case 'Sangat Menantang': return 'rose';
+                default: return 'purple';
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Initialize
+        loadUserData();
+        loadRekomendasi();
+    </script>
+</body>
+
+</html>

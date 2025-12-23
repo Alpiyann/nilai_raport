@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables (SENSITIVE - DO NOT UPLOAD)
+.env
+
+# Database
+data/*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/

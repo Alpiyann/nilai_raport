@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Akademik - Kelola Mata Pelajaran">
+    <title>Kelola Mapel - Portal Akademik</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .page-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+            flex-wrap: wrap;
+            gap: var(--space-4);
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box .icon {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4);
+            padding-left: calc(var(--space-4) + 24px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            color: var(--text-primary);
+        }
+
+        .mapel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .mapel-card {
+            padding: var(--space-6);
+            position: relative;
+        }
+
+        .mapel-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-4);
+        }
+
+        .mapel-card-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-1);
+        }
+
+        .mapel-card-category {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+
+        .mapel-card-actions {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .mapel-nilai-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-3);
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .nilai-item {
+            text-align: center;
+            padding: var(--space-3);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+        }
+
+        .nilai-semester {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-1);
+        }
+
+        .nilai-value {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+        }
+
+        .nilai-value.good {
+            color: var(--accent-emerald);
+        }
+
+        .nilai-value.medium {
+            color: var(--accent-amber);
+        }
+
+        .nilai-value.low {
+            color: var(--accent-rose);
+        }
+
+        .nilai-value.empty {
+            color: var(--text-muted);
+        }
+
+        .mapel-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .mapel-average {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .mapel-average-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+        }
+
+        .mapel-average-value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--primary-400);
+        }
+
+        /* Modal Nilai */
+        .nilai-input-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-4);
+        }
+
+        .nilai-input-item {
+            padding: var(--space-4);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--glass-border);
+        }
+
+        .nilai-input-item.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .nilai-input-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-2);
+        }
+
+        .nilai-input-field {
+            width: 100%;
+            padding: var(--space-3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .nilai-input-field:focus {
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        .nilai-input-field:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            cursor: not-allowed;
+        }
+
+        /* Semester Checkbox */
+        .semester-checkbox-grid {
+            display: flex;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        .semester-checkbox {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .semester-checkbox:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .semester-checkbox input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-500);
+        }
+
+        .semester-checkbox.checked {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: var(--primary-500);
+        }
+
+        @media (max-width: 768px) {
+            .mapel-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .nilai-input-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .semester-checkbox-grid {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars" style="font-size: 24px;"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🎓</div>
+            <span class="sidebar-logo-text">Cek Rata-Rata</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-nav-item">
+                <i class="fa-solid fa-gauge-high"></i>
+                Dashboard
+            </a>
+            <a href="/mapel" class="sidebar-nav-item active">
+                <i class="fa-solid fa-book"></i>
+                Kelola Mapel
+            </a>
+            <a href="/nilai" class="sidebar-nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Nilai Raport
+            </a>
+            <a href="/rekomendasi" class="sidebar-nav-item">
+                <i class="fa-solid fa-graduation-cap"></i>
+                Rekomendasi PTN
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="userAvatar">U</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="userName">User</div>
+                    <div class="sidebar-user-email" id="userEmail">user@email.com</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: var(--space-4);" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Kelola Mata Pelajaran</h1>
+            <p class="page-subtitle">Tambah dan kelola mata pelajaran beserta nilainya</p>
+        </div>
+
+        <div class="page-actions">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass icon"></i>
+                <input type="text" id="searchInput" placeholder="Cari mata pelajaran..." oninput="filterMapel()">
+            </div>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <i class="fa-solid fa-plus"></i>
+                Tambah Mapel
+            </button>
+        </div>
+
+        <!-- Mapel Grid -->
+        <div class="mapel-grid" id="mapelGrid">
+            <!-- Cards will be rendered here -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state glass-card-static" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">📚</div>
+            <h3 class="empty-state-title">Belum Ada Mata Pelajaran</h3>
+            <p class="empty-state-text">Mulai dengan menambahkan mata pelajaran pertamamu</p>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <i class="fa-solid fa-plus"></i>
+                Tambah Mapel
+            </button>
+        </div>
+    </main>
+
+    <!-- Add/Edit Mapel Modal -->
+    <div class="modal-overlay" id="mapelModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Tambah Mata Pelajaran</h3>
+                <button class="modal-close" onclick="closeModal('mapelModal')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="mapelForm" onsubmit="saveMapel(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="mapelId">
+                    <div class="form-group">
+                        <label class="form-label">Nama Mata Pelajaran</label>
+                        <input type="text" id="namaMapel" class="form-input" placeholder="Contoh: Matematika" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kategori</label>
+                        <select id="kategoriMapel" class="form-select">
+                            <option value="Wajib">Wajib</option>
+                            <option value="Peminatan">Peminatan</option>
+                            <option value="Lintas Minat">Lintas Minat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Semester yang Tersedia</label>
+                        <p class="text-muted text-sm mb-2">Pilih semester mana saja mapel ini diajarkan</p>
+                        <div class="semester-checkbox-grid">
+                            <label class="semester-checkbox" id="semCheck1">
+                                <input type="checkbox" id="sem1" value="1" checked onchange="updateCheckboxStyle(1)">
+                                <span>Sem 1</span>
+                            </label>
+                            <label class="semester-checkbox" id="semCheck2">
+                                <input type="checkbox" id="sem2" value="2" checked onchange="updateCheckboxStyle(2)">
+                                <span>Sem 2</span>
+                            </label>
+                            <label class="semester-checkbox" id="semCheck3">
+                                <input type="checkbox" id="sem3" value="3" checked onchange="updateCheckboxStyle(3)">
+                                <span>Sem 3</span>
+                            </label>
+                            <label class="semester-checkbox" id="semCheck4">
+                                <input type="checkbox" id="sem4" value="4" checked onchange="updateCheckboxStyle(4)">
+                                <span>Sem 4</span>
+                            </label>
+                            <label class="semester-checkbox" id="semCheck5">
+                                <input type="checkbox" id="sem5" value="5" checked onchange="updateCheckboxStyle(5)">
+                                <span>Sem 5</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('mapelModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Input Nilai Modal -->
+    <div class="modal-overlay" id="nilaiModal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Input Nilai - <span id="nilaiMapelName"></span></h3>
+                <button class="modal-close" onclick="closeModal('nilaiModal')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="nilaiForm" onsubmit="saveNilai(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="nilaiMapelId">
+                    <p class="text-muted text-sm mb-4">Masukkan nilai untuk setiap semester (0-100)</p>
+                    <div class="nilai-input-grid" id="nilaiInputGrid">
+                        <div class="nilai-input-item" id="nilaiItem1">
+                            <div class="nilai-input-label">Semester 1</div>
+                            <input type="number" class="nilai-input-field" id="nilaiSem1" min="0" max="100" step="0.01"
+                                placeholder="-">
+                        </div>
+                        <div class="nilai-input-item" id="nilaiItem2">
+                            <div class="nilai-input-label">Semester 2</div>
+                            <input type="number" class="nilai-input-field" id="nilaiSem2" min="0" max="100" step="0.01"
+                                placeholder="-">
+                        </div>
+                        <div class="nilai-input-item" id="nilaiItem3">
+                            <div class="nilai-input-label">Semester 3</div>
+                            <input type="number" class="nilai-input-field" id="nilaiSem3" min="0" max="100" step="0.01"
+                                placeholder="-">
+                        </div>
+                        <div class="nilai-input-item" id="nilaiItem4">
+                            <div class="nilai-input-label">Semester 4</div>
+                            <input type="number" class="nilai-input-field" id="nilaiSem4" min="0" max="100" step="0.01"
+                                placeholder="-">
+                        </div>
+                        <div class="nilai-input-item" id="nilaiItem5">
+                            <div class="nilai-input-label">Semester 5</div>
+                            <input type="number" class="nilai-input-field" id="nilaiSem5" min="0" max="100" step="0.01"
+                                placeholder="-">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('nilaiModal')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Nilai</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi Hapus</h3>
+                <button class="modal-close" onclick="closeModal('deleteModal')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus mata pelajaran <strong id="deleteMapelName"></strong>?</p>
+                <p class="text-muted text-sm mt-2">Semua nilai terkait juga akan dihapus. Tindakan ini tidak dapat
+                    dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Batal</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        let mapelData = [];
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+                if (!data.isAuthenticated) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return data.user;
+            } catch (error) {
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await checkAuth();
+            if (!user) return;
+
+            document.getElementById('userName').textContent = user.nama;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').textContent = user.nama.charAt(0).toUpperCase();
+        }
+
+        // Load mapel data
+        async function loadMapel() {
+            try {
+                const response = await fetch('/api/mapel');
+                const data = await response.json();
+
+                if (data.success) {
+                    mapelData = data.data;
+                    renderMapel(mapelData);
+                }
+            } catch (error) {
+                showToast('Gagal memuat data mata pelajaran', 'error');
+            }
+        }
+
+        // Render mapel cards
+        function renderMapel(data) {
+            const grid = document.getElementById('mapelGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (data.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            grid.innerHTML = data.map(mapel => {
+                const rataRata = mapel.rata_rata ? parseFloat(mapel.rata_rata).toFixed(1) : '-';
+                return `
+                    <div class="mapel-card glass-card" data-id="${mapel.id}">
+                        <div class="mapel-card-header">
+                            <div>
+                                <h3 class="mapel-card-title">${mapel.nama_mapel}</h3>
+                                <span class="badge badge-${getCategoryBadge(mapel.kategori)}">${mapel.kategori}</span>
+                            </div>
+                            <div class="mapel-card-actions">
+                                <button class="btn btn-icon btn-secondary" onclick="openNilaiModal(${mapel.id}, '${mapel.nama_mapel}')" title="Input Nilai">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="btn btn-icon btn-secondary" onclick="openEditModal(${mapel.id})" title="Edit Mapel">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                    </svg>
+                                </button>
+                                <button class="btn btn-icon btn-secondary" onclick="openDeleteModal(${mapel.id}, '${mapel.nama_mapel}')" title="Hapus Mapel">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mapel-card-footer">
+                            <div class="mapel-average">
+                                <span class="mapel-average-label">Rata-rata:</span>
+                                <span class="mapel-average-value">${rataRata}</span>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="openNilaiModal(${mapel.id}, '${mapel.nama_mapel}')">
+                                Input Nilai
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get category badge class
+        function getCategoryBadge(kategori) {
+            switch (kategori) {
+                case 'Wajib': return 'purple';
+                case 'Peminatan': return 'cyan';
+                case 'Lintas Minat': return 'amber';
+                default: return 'purple';
+            }
+        }
+
+        // Filter mapel
+        function filterMapel() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = mapelData.filter(mapel =>
+                mapel.nama_mapel.toLowerCase().includes(query) ||
+                mapel.kategori.toLowerCase().includes(query)
+            );
+            renderMapel(filtered);
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'Tambah Mata Pelajaran';
+            document.getElementById('mapelForm').reset();
+            document.getElementById('mapelId').value = '';
+            // Reset semua checkbox ke checked
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`sem${i}`).checked = true;
+                updateCheckboxStyle(i);
+            }
+            openModal('mapelModal');
+        }
+
+        async function openEditModal(id) {
+            const mapel = mapelData.find(m => m.id === id);
+            if (!mapel) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Mata Pelajaran';
+            document.getElementById('mapelId').value = mapel.id;
+            document.getElementById('namaMapel').value = mapel.nama_mapel;
+            document.getElementById('kategoriMapel').value = mapel.kategori;
+
+            // Set semester checkboxes berdasarkan data
+            const semesters = mapel.semester_tersedia ? mapel.semester_tersedia.split(',').map(Number) : [1, 2, 3, 4, 5];
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`sem${i}`).checked = semesters.includes(i);
+                updateCheckboxStyle(i);
+            }
+
+            openModal('mapelModal');
+        }
+
+        function updateCheckboxStyle(sem) {
+            const checkbox = document.getElementById(`sem${sem}`);
+            const label = document.getElementById(`semCheck${sem}`);
+            if (checkbox.checked) {
+                label.classList.add('checked');
+            } else {
+                label.classList.remove('checked');
+            }
+        }
+
+        async function openNilaiModal(mapelId, namaMapel) {
+            document.getElementById('nilaiMapelId').value = mapelId;
+            document.getElementById('nilaiMapelName').textContent = namaMapel;
+
+            // Get mapel data untuk semester_tersedia
+            const mapel = mapelData.find(m => m.id === mapelId);
+            const semesters = mapel && mapel.semester_tersedia ? mapel.semester_tersedia.split(',').map(Number) : [1, 2, 3, 4, 5];
+
+            // Reset all inputs dan disable yang tidak tersedia
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`nilaiSem${i}`);
+                const item = document.getElementById(`nilaiItem${i}`);
+                input.value = '';
+
+                if (semesters.includes(i)) {
+                    item.classList.remove('disabled');
+                    input.disabled = false;
+                } else {
+                    item.classList.add('disabled');
+                    input.disabled = true;
+                }
+            }
+
+            // Load existing nilai
+            try {
+                const response = await fetch(`/api/nilai/mapel/${mapelId}`);
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    data.data.forEach(nilai => {
+                        const input = document.getElementById(`nilaiSem${nilai.semester}`);
+                        if (input && !input.disabled) {
+                            input.value = nilai.nilai;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to load nilai:', error);
+            }
+
+            openModal('nilaiModal');
+        }
+
+        function openDeleteModal(id, name) {
+            document.getElementById('deleteMapelName').textContent = name;
+            document.getElementById('confirmDeleteBtn').onclick = () => deleteMapel(id);
+            openModal('deleteModal');
+        }
+
+        // Save mapel
+        async function saveMapel(event) {
+            event.preventDefault();
+
+            const id = document.getElementById('mapelId').value;
+            const nama_mapel = document.getElementById('namaMapel').value;
+            const kategori = document.getElementById('kategoriMapel').value;
+
+            // Ambil semester yang dipilih
+            const semester_tersedia = [];
+            for (let i = 1; i <= 5; i++) {
+                if (document.getElementById(`sem${i}`).checked) {
+                    semester_tersedia.push(i);
+                }
+            }
+
+            if (semester_tersedia.length === 0) {
+                showToast('Pilih minimal 1 semester', 'error');
+                return;
+            }
+
+            const url = id ? `/api/mapel/${id}` : '/api/mapel';
+            const method = id ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama_mapel, kategori, semester_tersedia: semester_tersedia.join(',') })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message);
+                    closeModal('mapelModal');
+                    loadMapel();
+                } else {
+                    showToast(data.message || 'Gagal menyimpan', 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        // Save nilai
+        async function saveNilai(event) {
+            event.preventDefault();
+
+            const mapelId = document.getElementById('nilaiMapelId').value;
+            const nilaiList = [];
+
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`nilaiSem${i}`);
+                if (!input.disabled && input.value !== '') {
+                    nilaiList.push({ semester: i, nilai: parseFloat(input.value) });
+                }
+            }
+
+            try {
+                const response = await fetch('/api/nilai/batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mapel_id: mapelId, nilai_list: nilaiList })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Nilai berhasil disimpan');
+                    closeModal('nilaiModal');
+                    loadMapel();
+                } else {
+                    showToast(data.message || 'Gagal menyimpan nilai', 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        // Delete mapel
+        async function deleteMapel(id) {
+            try {
+                const response = await fetch(`/api/mapel/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast('Mata pelajaran berhasil dihapus');
+                    closeModal('deleteModal');
+                    loadMapel();
+                } else {
+                    showToast(data.message || 'Gagal menghapus', 'error');
+                }
+            } catch (error) {
+                showToast('Terjadi kesalahan', 'error');
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${type === 'success'
+                    ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                    : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+                }
+                </svg>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Close modal when clicking outside
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize
+        loadUserData();
+        loadMapel();
+    </script>
+    <script src="/js/mapel.js"></script>
+</body>
+
+</html>

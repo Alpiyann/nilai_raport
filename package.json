@@ -1,0 +1,20 @@
+{
+  "name": "portal-akademik",
+  "version": "1.0.0",
+  "description": "Portal Akademik - Sistem Manajemen Nilai dan Rekomendasi PTN",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^12.5.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "mysql2": "^3.6.5",
+    "nodemailer": "^7.0.12"
+  }
+}

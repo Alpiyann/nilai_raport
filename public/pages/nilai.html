@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Akademik - Nilai Raport">
+    <title>Nilai Raport - Cek Rata-Rata</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .nilai-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .overview-card {
+            padding: var(--space-6);
+            text-align: center;
+        }
+
+        .overview-value {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .overview-label {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-top: var(--space-2);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-6);
+            margin-bottom: var(--space-8);
+        }
+
+        .chart-card {
+            padding: var(--space-6);
+        }
+
+        .chart-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+        }
+
+        .semester-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .semester-card {
+            padding: var(--space-5);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .semester-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        .semester-number {
+            font-size: var(--font-size-sm);
+            color: var(--text-muted);
+            margin-bottom: var(--space-2);
+        }
+
+        .semester-value {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+        }
+
+        .semester-value.excellent {
+            color: var(--accent-emerald);
+        }
+
+        .semester-value.good {
+            color: var(--primary-400);
+        }
+
+        .semester-value.average {
+            color: var(--accent-amber);
+        }
+
+        .semester-value.poor {
+            color: var(--accent-rose);
+        }
+
+        .semester-value.empty {
+            color: var(--text-muted);
+        }
+
+        .semester-count {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            margin-top: var(--space-1);
+        }
+
+        .mapel-list {
+            margin-top: var(--space-6);
+        }
+
+        .mapel-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .mapel-list-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+        }
+
+        .nilai-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .nilai-bar-track {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+        }
+
+        .nilai-bar-fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 0.5s ease;
+        }
+
+        .nilai-bar-fill.excellent {
+            background: var(--accent-emerald);
+        }
+
+        .nilai-bar-fill.good {
+            background: var(--primary-500);
+        }
+
+        .nilai-bar-fill.average {
+            background: var(--accent-amber);
+        }
+
+        .nilai-bar-fill.poor {
+            background: var(--accent-rose);
+        }
+
+        .nilai-bar-value {
+            font-weight: 600;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .semester-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars" style="font-size: 24px;"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🎓</div>
+            <span class="sidebar-logo-text">Cek Rata-Rata</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-nav-item">
+                <i class="fa-solid fa-gauge-high"></i>
+                Dashboard
+            </a>
+            <a href="/mapel" class="sidebar-nav-item">
+                <i class="fa-solid fa-book"></i>
+                Kelola Mapel
+            </a>
+            <a href="/nilai" class="sidebar-nav-item active">
+                <i class="fa-solid fa-chart-line"></i>
+                Nilai Raport
+            </a>
+            <a href="/rekomendasi" class="sidebar-nav-item">
+                <i class="fa-solid fa-graduation-cap"></i>
+                Rekomendasi PTN
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="userAvatar">U</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="userName">User</div>
+                    <div class="sidebar-user-email" id="userEmail">user@email.com</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: var(--space-4);" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Nilai Raport</h1>
+            <p class="page-subtitle">Lihat dan analisis perkembangan nilai akademikmu</p>
+        </div>
+
+        <!-- Overview Cards -->
+        <div class="nilai-overview">
+            <div class="overview-card glass-card">
+                <div class="overview-value" id="avgKeseluruhan">0.00</div>
+                <div class="overview-label">Rata-rata Keseluruhan</div>
+            </div>
+            <div class="overview-card glass-card">
+                <div class="overview-value" id="totalMapel">0</div>
+                <div class="overview-label">Mata Pelajaran</div>
+            </div>
+            <div class="overview-card glass-card">
+                <div class="overview-value" id="mapelTerbaik">-</div>
+                <div class="overview-label">Mapel Terbaik</div>
+            </div>
+            <div class="overview-card glass-card">
+                <div class="overview-value" id="semesterTerbaik">-</div>
+                <div class="overview-label">Semester Terbaik</div>
+            </div>
+        </div>
+
+        <!-- Semester Grid -->
+        <h3 class="font-semibold mb-4">Rata-rata per Semester</h3>
+        <div class="semester-grid" id="semesterGrid">
+            <!-- Semester cards will be rendered here -->
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card glass-card-static">
+                <h3 class="chart-title">Grafik Nilai per Semester</h3>
+                <div class="chart-container">
+                    <canvas id="semesterChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card glass-card-static">
+                <h3 class="chart-title">Perbandingan Mata Pelajaran</h3>
+                <div class="chart-container">
+                    <canvas id="mapelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapel List -->
+        <div class="mapel-list glass-card-static" style="padding: var(--space-6);">
+            <div class="mapel-list-header">
+                <h3 class="mapel-list-title">Detail per Mata Pelajaran</h3>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mata Pelajaran</th>
+                            <th>Kategori</th>
+                            <th>Rata-rata</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mapelTableBody">
+                        <!-- Data will be rendered here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        let semesterChart = null;
+        let mapelChart = null;
+
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+                if (!data.isAuthenticated) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return data.user;
+            } catch (error) {
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await checkAuth();
+            if (!user) return;
+
+            document.getElementById('userName').textContent = user.nama;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').textContent = user.nama.charAt(0).toUpperCase();
+        }
+
+        // Load nilai summary
+        async function loadNilaiSummary() {
+            try {
+                const response = await fetch('/api/nilai/summary');
+                const data = await response.json();
+
+                if (data.success) {
+                    renderSummary(data.data);
+                }
+            } catch (error) {
+                console.error('Failed to load nilai summary:', error);
+            }
+        }
+
+        // Render summary
+        function renderSummary(summary) {
+            // Update overview
+            document.getElementById('avgKeseluruhan').textContent = parseFloat(summary.rataRataKeseluruhan || 0).toFixed(2);
+            document.getElementById('totalMapel').textContent = summary.totalMapel || 0;
+
+            // Best mapel
+            if (summary.perMapel && summary.perMapel.length > 0) {
+                document.getElementById('mapelTerbaik').textContent = summary.perMapel[0].nama_mapel;
+            }
+
+            // Best semester
+            if (summary.perSemester && summary.perSemester.length > 0) {
+                const best = summary.perSemester.reduce((a, b) => parseFloat(a.rata_rata) > parseFloat(b.rata_rata) ? a : b);
+                document.getElementById('semesterTerbaik').textContent = `Sem ${best.semester}`;
+            }
+
+            // Render semester cards
+            renderSemesterCards(summary.perSemester);
+
+            // Render charts
+            renderSemesterChart(summary.perSemester);
+            renderMapelChart(summary.perMapel);
+
+            // Render table
+            renderMapelTable(summary.perMapel);
+        }
+
+        // Render semester cards
+        function renderSemesterCards(perSemester) {
+            const grid = document.getElementById('semesterGrid');
+            const semesters = [];
+
+            // Create array for all 5 semesters
+            for (let i = 1; i <= 5; i++) {
+                const found = perSemester ? perSemester.find(s => s.semester === i) : null;
+                semesters.push({
+                    semester: i,
+                    rata_rata: found ? found.rata_rata : null,
+                    jumlah_mapel: found ? found.jumlah_mapel : 0
+                });
+            }
+
+            grid.innerHTML = semesters.map(sem => {
+                const nilai = sem.rata_rata !== null ? parseFloat(sem.rata_rata).toFixed(1) : '-';
+                const colorClass = getColorClass(sem.rata_rata);
+
+                return `
+                    <div class="semester-card glass-card">
+                        <div class="semester-number">Semester ${sem.semester}</div>
+                        <div class="semester-value ${colorClass}">${nilai}</div>
+                        <div class="semester-count">${sem.jumlah_mapel} mapel</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get color class based on nilai
+        function getColorClass(nilai) {
+            if (nilai === null) return 'empty';
+            const n = parseFloat(nilai);
+            if (n >= 85) return 'excellent';
+            if (n >= 70) return 'good';
+            if (n >= 55) return 'average';
+            return 'poor';
+        }
+
+        // Render semester chart
+        function renderSemesterChart(perSemester) {
+            const ctx = document.getElementById('semesterChart').getContext('2d');
+
+            if (semesterChart) {
+                semesterChart.destroy();
+            }
+
+            const labels = [];
+            const values = [];
+
+            for (let i = 1; i <= 5; i++) {
+                labels.push(`Sem ${i}`);
+                const found = perSemester ? perSemester.find(s => s.semester === i) : null;
+                values.push(found ? parseFloat(found.rata_rata).toFixed(2) : 0);
+            }
+
+            semesterChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rata-rata',
+                        data: values,
+                        backgroundColor: [
+                            'rgba(124, 58, 237, 0.8)',
+                            'rgba(6, 182, 212, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(244, 63, 94, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(124, 58, 237, 1)',
+                            'rgba(6, 182, 212, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(244, 63, 94, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#6b7280' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#6b7280' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render mapel chart (radar)
+        function renderMapelChart(perMapel) {
+            const ctx = document.getElementById('mapelChart').getContext('2d');
+
+            if (mapelChart) {
+                mapelChart.destroy();
+            }
+
+            if (!perMapel || perMapel.length === 0) {
+                // Show empty message
+                ctx.font = '14px Inter';
+                ctx.fillStyle = '#6b7280';
+                ctx.textAlign = 'center';
+                ctx.fillText('Belum ada data nilai', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            const top5 = perMapel.slice(0, 5);
+            const labels = top5.map(m => m.nama_mapel.length > 12 ? m.nama_mapel.substring(0, 12) + '...' : m.nama_mapel);
+            const values = top5.map(m => parseFloat(m.rata_rata).toFixed(2));
+
+            mapelChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nilai',
+                        data: values,
+                        fill: true,
+                        backgroundColor: 'rgba(124, 58, 237, 0.2)',
+                        borderColor: 'rgba(124, 58, 237, 1)',
+                        pointBackgroundColor: 'rgba(124, 58, 237, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(124, 58, 237, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                color: '#6b7280',
+                                backdropColor: 'transparent'
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#a5b4fc', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render mapel table
+        function renderMapelTable(perMapel) {
+            const tbody = document.getElementById('mapelTableBody');
+
+            if (!perMapel || perMapel.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted" style="padding: var(--space-8);">
+                            Belum ada data nilai. <a href="/mapel" style="color: var(--primary-400);">Tambah mata pelajaran</a>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = perMapel.map(mapel => {
+                const nilai = parseFloat(mapel.rata_rata).toFixed(1);
+                const colorClass = getColorClass(mapel.rata_rata);
+
+                return `
+                    <tr>
+                        <td><strong>${mapel.nama_mapel}</strong></td>
+                        <td><span class="badge badge-${getCategoryBadge(mapel.kategori)}">${mapel.kategori}</span></td>
+                        <td><strong class="${colorClass}">${nilai}</strong></td>
+                        <td>
+                            <div class="nilai-bar">
+                                <div class="nilai-bar-track">
+                                    <div class="nilai-bar-fill ${colorClass}" style="width: ${nilai}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Get category badge class
+        function getCategoryBadge(kategori) {
+            switch (kategori) {
+                case 'Wajib': return 'purple';
+                case 'Peminatan': return 'cyan';
+                case 'Lintas Minat': return 'amber';
+                default: return 'purple';
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Initialize
+        loadUserData();
+        loadNilaiSummary();
+    </script>
+    <script src="/js/nilai.js"></script>
+</body>
+
+</html>

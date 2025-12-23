@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portal Akademik - Dashboard">
+    <title>Dashboard - Cek Rata-Rata</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .welcome-section {
+            background: var(--gradient-primary);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            margin-bottom: var(--space-8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .welcome-section::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--space-2);
+        }
+
+        .welcome-subtitle {
+            font-size: var(--font-size-lg);
+            opacity: 0.9;
+            margin-bottom: var(--space-6);
+        }
+
+        .welcome-stats {
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .welcome-stat {
+            text-align: center;
+        }
+
+        .welcome-stat-value {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+        }
+
+        .welcome-stat-label {
+            font-size: var(--font-size-sm);
+            opacity: 0.8;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: var(--space-6);
+        }
+
+        .chart-card {
+            padding: var(--space-6);
+        }
+
+        .chart-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .chart-card-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .quick-action-card {
+            padding: var(--space-5);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+        }
+
+        .quick-action-card:hover {
+            background: rgba(124, 58, 237, 0.1);
+            border-color: var(--primary-500);
+        }
+
+        .quick-action-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto var(--space-3);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xl);
+        }
+
+        .quick-action-title {
+            font-weight: 500;
+            font-size: var(--font-size-sm);
+        }
+
+        .recent-activity {
+            padding: var(--space-6);
+        }
+
+        .activity-list {
+            margin-top: var(--space-4);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-3) 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-sm);
+        }
+
+        .activity-icon.nilai {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-emerald);
+        }
+
+        .activity-icon.mapel {
+            background: rgba(6, 182, 212, 0.2);
+            color: var(--accent-cyan);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+        }
+
+        .activity-time {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-stats {
+                flex-wrap: wrap;
+                gap: var(--space-4);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="animated-bg"></div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <i class="fa-solid fa-bars" style="font-size: 24px;"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🎓</div>
+            <span class="sidebar-logo-text">Cek Rata-Rata</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="sidebar-nav-item active">
+                <i class="fa-solid fa-gauge-high"></i>
+                Dashboard
+            </a>
+            <a href="/mapel" class="sidebar-nav-item">
+                <i class="fa-solid fa-book"></i>
+                Kelola Mapel
+            </a>
+            <a href="/nilai" class="sidebar-nav-item">
+                <i class="fa-solid fa-chart-line"></i>
+                Nilai Raport
+            </a>
+            <a href="/rekomendasi" class="sidebar-nav-item">
+                <i class="fa-solid fa-graduation-cap"></i>
+                Rekomendasi PTN
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar" id="userAvatar">U</div>
+                <div class="sidebar-user-info">
+                    <div class="sidebar-user-name" id="userName">User</div>
+                    <div class="sidebar-user-email" id="userEmail">user@email.com</div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; margin-top: var(--space-4);" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <div class="welcome-content">
+                <h1 class="welcome-title">Selamat Datang, <span id="welcomeName">User</span>! 👋</h1>
+                <p class="welcome-subtitle">Pantau perkembangan akademikmu dan temukan PTN impian</p>
+                <div class="welcome-stats">
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value counter" data-target="0" id="statMapel">0</div>
+                        <div class="welcome-stat-label">Mata Pelajaran</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value" id="statRataRata">0.00</div>
+                        <div class="welcome-stat-label">Rata-rata Nilai</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-value counter" data-target="0" id="statPTN">0</div>
+                        <div class="welcome-stat-label">PTN Cocok</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card glass-card">
+                <div class="stat-card-icon purple">
+                    <i class="fa-solid fa-book"></i>
+                </div>
+                <div class="stat-card-value counter" id="cardMapel">0</div>
+                <div class="stat-card-label">Total Mata Pelajaran</div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-card-icon cyan">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="stat-card-value" id="cardRataRata">0.00</div>
+                <div class="stat-card-label">Rata-rata Keseluruhan</div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-card-icon emerald">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="stat-card-value counter" id="cardNilai">0</div>
+                <div class="stat-card-label">Nilai Terinput</div>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-card-icon amber">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="stat-card-value counter" id="cardPTN">0</div>
+                <div class="stat-card-label">PTN Rekomendasi</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Chart Section -->
+            <div class="chart-card glass-card-static">
+                <div class="chart-card-header">
+                    <h3 class="chart-card-title">Perkembangan Nilai per Semester</h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="nilaiChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Quick Actions -->
+                <h3 class="font-semibold mb-4">Aksi Cepat</h3>
+                <div class="quick-actions">
+                    <a href="/mapel" class="quick-action-card glass-card">
+                        <div class="quick-action-icon"
+                            style="background: rgba(124, 58, 237, 0.2); color: var(--primary-400);">
+                            <i class="fa-solid fa-plus"></i>
+                        </div>
+                        <div class="quick-action-title">Tambah Mapel</div>
+                    </a>
+                    <a href="/nilai" class="quick-action-card glass-card">
+                        <div class="quick-action-icon"
+                            style="background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan);">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <div class="quick-action-title">Input Nilai</div>
+                    </a>
+                    <a href="/rekomendasi" class="quick-action-card glass-card">
+                        <div class="quick-action-icon"
+                            style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald);">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <div class="quick-action-title">Cari PTN</div>
+                    </a>
+                    <a href="/nilai" class="quick-action-card glass-card">
+                        <div class="quick-action-icon"
+                            style="background: rgba(245, 158, 11, 0.2); color: var(--accent-amber);">
+                            <i class="fa-solid fa-chart-column"></i>
+                        </div>
+                        <div class="quick-action-title">Lihat Statistik</div>
+                    </a>
+                </div>
+
+                <!-- Top Subjects -->
+                <div class="recent-activity glass-card-static">
+                    <h3 class="font-semibold">Top Mata Pelajaran</h3>
+                    <div class="activity-list" id="topSubjects">
+                        <div class="empty-state" style="padding: var(--space-8);">
+                            <p class="text-muted text-sm">Belum ada data nilai</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Check authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/status');
+                const data = await response.json();
+                if (!data.isAuthenticated) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                return data.user;
+            } catch (error) {
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
+        // Load user data
+        async function loadUserData() {
+            const user = await checkAuth();
+            if (!user) return;
+
+            document.getElementById('welcomeName').textContent = user.nama.split(' ')[0];
+            document.getElementById('userName').textContent = user.nama;
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userAvatar').textContent = user.nama.charAt(0).toUpperCase();
+        }
+
+        // Load dashboard stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+
+                    // Update counters with animation
+                    animateCounter('statMapel', stats.jumlahMapel);
+                    animateCounter('cardMapel', stats.jumlahMapel);
+                    animateCounter('cardNilai', stats.jumlahNilai);
+                    animateCounter('statPTN', stats.jumlahPTN);
+                    animateCounter('cardPTN', stats.jumlahPTN);
+
+                    // Update rata-rata
+                    document.getElementById('statRataRata').textContent = stats.rataRata;
+                    document.getElementById('cardRataRata').textContent = stats.rataRata;
+
+                    // Render chart
+                    renderChart(stats.nilaiPerSemester);
+
+                    // Render top subjects
+                    renderTopSubjects(stats.topSubjects);
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Animate counter
+        function animateCounter(elementId, target) {
+            const element = document.getElementById(elementId);
+            const duration = 1500;
+            const start = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.floor(start + (target - start) * easeOutQuart);
+                element.textContent = current;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target;
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // Render chart
+        let nilaiChart = null;
+        function renderChart(nilaiPerSemester) {
+            const ctx = document.getElementById('nilaiChart').getContext('2d');
+
+            if (nilaiChart) {
+                nilaiChart.destroy();
+            }
+
+            const labels = nilaiPerSemester.map(n => `Semester ${n.semester}`);
+            const values = nilaiPerSemester.map(n => parseFloat(n.rata_rata).toFixed(2));
+
+            // If no data, show placeholder
+            if (labels.length === 0) {
+                labels.push('Semester 1', 'Semester 2', 'Semester 3', 'Semester 4', 'Semester 5', 'Semester 6');
+                values.push(0, 0, 0, 0, 0, 0);
+            }
+
+            nilaiChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rata-rata Nilai',
+                        data: values,
+                        borderColor: '#7c3aed',
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#7c3aed',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                            titleColor: '#fff',
+                            bodyColor: '#a5b4fc',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        y: {
+                            min: 0,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render top subjects
+        function renderTopSubjects(topSubjects) {
+            const container = document.getElementById('topSubjects');
+
+            if (!topSubjects || topSubjects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding: var(--space-8);">
+                        <p class="text-muted text-sm">Belum ada data nilai</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = topSubjects.map((subject, index) => `
+                <div class="activity-item">
+                    <div class="activity-icon nilai">
+                        ${index + 1}
+                    </div>
+                    <div class="activity-info">
+                        <div class="activity-title">${subject.nama_mapel}</div>
+                        <div class="activity-time">${subject.kategori}</div>
+                    </div>
+                    <span class="badge badge-emerald">${parseFloat(subject.rata_rata).toFixed(1)}</span>
+                </div>
+            `).join('');
+        }
+
+        // Toggle sidebar for mobile
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <svg class="toast-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    ${type === 'success'
+                    ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'
+                    : '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+                }
+                </svg>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // Initialize
+        loadUserData();
+        loadStats();
+    </script>
+</body>
+
+</html>
